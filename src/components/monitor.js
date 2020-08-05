@@ -24,6 +24,8 @@ module.exports = class Monitor extends Configurable(Component) {
 
         this.sock.on('status', (status) => this.emit('status', status));
 
+        this.list=[]
+
         const onPort = (err, port) => {
             advertisement.port = +port;
 
@@ -51,38 +53,57 @@ module.exports = class Monitor extends Configurable(Component) {
 
         const interval = this.discoveryOptions.interval || 5000;
 
-        charm.pipe(this.stream || process.stdout);
-        charm.reset().erase('screen').position(0, 0).
-            write('                                                                                    ');
 
-        const draw = () => {
-            charm.erase('screen');
-            let index = 3;
-            charm.position(0, 2);
-            charm.foreground('green').
-                write('Name').move(16).
-                write('id').move(37).
-                write('Address').move(11).
-                write('Port');
+        const check = () =>{
 
-            charm.erase('down');
+            let tempDiscovery=Object.values(this.discovery.nodes).map(x=>x.advertisement.name)
+            console.log('check',tempDiscovery,this.list)
+            if(tempDiscovery!=this.list){
 
-            this.discovery.eachNode((node) => {
-                let port = node.advertisement.port || '----';
-                port += '';
-                charm.position(0, index).foreground('cyan').
-                    write(node.advertisement.name.slice(0, 20)).move(20 - node.advertisement.name.length, 0).
-                    foreground('magenta').write(node.id).move(3, 0).
-                    foreground('yellow').write(node.address).move(3, 0).
-                    foreground('red').write(port);
-                index++;
-            });
+                    if(tempDiscovery.length<this.list.length){
+                        let difference = this.list.filter(x => !tempDiscovery.includes(x));
+                        this.emit('crashed',difference);
+                    }
+                    if(tempDiscovery.length>this.list.length){
+                        let difference = tempDiscovery.filter(x => !this.list.includes(x));
+                        this.emit('new',difference);
+                    }
+                    this.list=tempDiscovery
 
-            charm.position(0, 1);
 
-            setTimeout(draw, interval);
-        };
+            }
+            setTimeout(check, interval);
+        }
+        check()
+        // const draw = () => {
+        //     charm.erase('screen');
+        //     let index = 3;
+        //     charm.position(0, 2);
+        //     charm.foreground('green').
+        //         write('Name').move(16).
+        //         write('id').move(37).
+        //         write('Address').move(11).
+        //         write('Port');
+        //
+        //     charm.erase('down');
+        //
+        //     this.discovery.eachNode((node) => {
+        //         let port = node.advertisement.port || '----';
+        //         port += '';
+        //         charm.position(0, index).foreground('cyan').
+        //             write(node.advertisement.name.slice(0, 20)).move(20 - node.advertisement.name.length, 0).
+        //             foreground('magenta').write(node.id).move(3, 0).
+        //             foreground('yellow').write(node.address).move(3, 0).
+        //             foreground('red').write(port);
+        //         index++;
+        //
+        //     });
+        //
+        //     charm.position(0, 1);
+        //
+        //     setTimeout(draw, interval);
+        // };
 
-        draw();
+        //draw();
     }
 };

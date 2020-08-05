@@ -53,7 +53,7 @@ class Discovery extends Discover {
     }
 
     log(logs) {
-        console.log.apply(console.log, logs);
+        //console.log.apply(console.log, logs);
     }
 
     helloLogger() {

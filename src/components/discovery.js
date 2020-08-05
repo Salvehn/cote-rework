@@ -9,7 +9,7 @@ const defaultOptions = {
     nodeTimeout: 5000,
     masterTimeout: 6000,
     monitor: false,
-    log: true,
+    log: false,
     helloLogsEnabled: true,
     statusLogsEnabled: true,
     ignoreProcess: false,
@@ -53,7 +53,7 @@ class Discovery extends Discover {
     }
 
     log(logs) {
-        //console.log.apply(console.log, logs);
+        console.log.apply(console.log, logs);
     }
 
     helloLogger() {
